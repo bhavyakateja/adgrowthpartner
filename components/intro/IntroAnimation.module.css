@@ -1,0 +1,120 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  isolation: isolate;
+
+  background: #f4f0e1;
+
+  opacity: 1;
+  visibility: visible;
+
+  transition:
+    opacity 500ms ease,
+    visibility 0s linear 0s;
+
+  /*
+    The overlay itself never captures pointer events.
+    Once the intro fades, the underlying site remains fully interactive.
+  */
+  pointer-events: none;
+}
+
+.overlay[data-visible='false'] {
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 500ms ease,
+    visibility 0s linear 500ms;
+
+  pointer-events: none;
+}
+
+.video {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  max-width: none;
+  max-height: none;
+
+  object-fit: cover;
+  object-position: center center;
+
+  /*
+    Prevent the video from introducing inline-element spacing
+    or unexpected sizing behavior.
+  */
+  flex-shrink: 0;
+
+  /*
+    GPU compositing helps the fade remain smooth without affecting
+    the rest of the application.
+  */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .overlay {
+    width: 100vw;
+    height: 100dvh;
+  }
+
+  .video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+  .overlay {
+    width: 100vw;
+    height: 100dvh;
+  }
+
+  .video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+}
+
+/*
+  Very small / short screens.
+
+  Keeps the animation centered without allowing the browser viewport
+  to create unexpected overflow.
+*/
+@media (max-height: 600px) {
+  .video {
+    object-position: center center;
+  }
+}
+
+/*
+  Reduced motion is already handled in the hook, but this provides
+  an additional CSS-level safety layer.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: none;
+  }
+}

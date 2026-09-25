@@ -50,7 +50,7 @@ export function Reveal({
         delay,
         ease: [0.32, 0.72, 0, 1],
       }}
-      className={className}
+      className={`w-full max-w-full box-border ${className || ""}`}
     >
       {children}
     </Component>

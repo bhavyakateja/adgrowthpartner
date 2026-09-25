@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import "./globals.css";
 
 import { SiteChrome } from "@/components/site/SiteChrome";
 import { I18nProvider } from "@/lib/i18n";
+import IntroAnimation from '@/components/intro/IntroAnimation';
 
 import {
   Anton,
@@ -60,6 +62,37 @@ export default function RootLayout({
       <body
         className={`${anton.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
       >
+        {/* Hidden Google Translate Element required for background widget script */}
+        <div id="google_translate_element" style={{ display: "none" }} />
+
+        {/* Google Translate Scripts */}
+        <Script
+          id="google-translate"
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
+        <Script id="google-translate-init" strategy="afterInteractive">
+          {`
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                autoDisplay: false
+              }, 'google_translate_element');
+            }
+            window.googleTranslateElementInit = googleTranslateElementInit;
+          `}
+        </Script>
+
+        {/* Global Styles to suppress Google's intrusive banner and layout jumps */}
+        <style>{`
+          .goog-te-banner-frame.skiptranslate { display: none !important; }
+          body { top: 0px !important; }
+          .goog-tooltip { display: none !important; }
+          .goog-tooltip:hover { display: none !important; }
+          .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+        `}</style>
+
+        <IntroAnimation />
         <I18nProvider>
           <SiteChrome>{children}</SiteChrome>
         </I18nProvider>

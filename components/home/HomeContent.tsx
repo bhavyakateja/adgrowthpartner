@@ -48,7 +48,7 @@ function Hero() {
           {SITE.tagline}
         </motion.p>
 
-        <h1 className="font-display mt-6 max-w-[18ch] text-[9vw] leading-[0.86] tracking-tight uppercase md:text-[5.5vw]">
+        <h1 className="font-display mt-6 max-w-[18ch] text-6xl sm:text-8xl md:text-[11vw] lg:text-[9vw] leading-[0.86] tracking-tight uppercase">
           <motion.span
             className="block"
             initial={reduced ? false : { opacity: 0, y: 40 }}

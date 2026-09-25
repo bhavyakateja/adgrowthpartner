@@ -57,8 +57,8 @@ export const getCachedHomeInsights = cache(
         readingTime: item.readingTime,
         category: item.category
           ? {
-              name: item.category.name,
-            }
+            name: item.category.name,
+          }
           : null,
       }));
     },
@@ -92,8 +92,8 @@ export const getCachedPublishedInsights = cache(
         readingTime: post.readingTime,
         category: post.category
           ? {
-              name: post.category.name,
-            }
+            name: post.category.name,
+          }
           : null,
       }));
     },
@@ -137,8 +137,8 @@ export const getCachedInsightBySlug = cache(
           seoDescription: post.seoDescription,
           category: post.category
             ? {
-                name: post.category.name,
-              }
+              name: post.category.name,
+            }
             : null,
         };
       },
@@ -345,7 +345,7 @@ export const getCachedSitemapData = cache(
 export function revalidateInsights(slug?: string) {
   try {
     revalidateTag("insights", "max");
-  } catch {}
+  } catch { }
   try {
     revalidatePath("/");
     revalidatePath("/insights");
@@ -354,7 +354,7 @@ export function revalidateInsights(slug?: string) {
     if (slug) {
       revalidatePath(`/insights/${slug}`);
     }
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -363,7 +363,7 @@ export function revalidateInsights(slug?: string) {
 export function revalidateJobs(slug?: string) {
   try {
     revalidateTag("jobs", "max");
-  } catch {}
+  } catch { }
   try {
     revalidatePath("/careers");
     revalidatePath("/sitemap");
@@ -371,7 +371,7 @@ export function revalidateJobs(slug?: string) {
     if (slug) {
       revalidatePath(`/careers/${slug}`);
     }
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -380,7 +380,7 @@ export function revalidateJobs(slug?: string) {
 export function revalidateCaseStudies(slug?: string) {
   try {
     revalidateTag("case-studies", "max");
-  } catch {}
+  } catch { }
   try {
     revalidatePath("/solutions");
     revalidatePath("/sitemap");
@@ -388,6 +388,6 @@ export function revalidateCaseStudies(slug?: string) {
     if (slug) {
       revalidatePath(`/work/${slug}`);
     }
-  } catch {}
+  } catch { }
 }
 

@@ -18,4 +18,4 @@ export default async function InsightsPage() {
     const posts = await getCachedPublishedInsights();
 
     return <InsightsContent posts={posts} />;
-}
+}

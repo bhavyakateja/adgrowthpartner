@@ -50,16 +50,18 @@ export default async function JobPage({ params }: Props) {
   }
 
   return (
-    <JobDetail
-      job={{
-        id: job.id,
-        title: job.title,
-        location: job.location,
-        employmentType: job.employmentType,
-        team: job.team,
-        description: job.description,
-        requirements: job.requirements,
-      }}
-    />
+    <div className="w-full max-w-[100vw] overflow-x-hidden box-border">
+      <JobDetail
+        job={{
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          employmentType: job.employmentType,
+          team: job.team,
+          description: job.description,
+          requirements: job.requirements,
+        }}
+      />
+    </div>
   );
-}
+}

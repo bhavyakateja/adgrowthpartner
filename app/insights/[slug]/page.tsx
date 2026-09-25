@@ -60,4 +60,4 @@ export default async function InsightPage({ params }: Props) {
     }
 
     return <InsightDetail post={post} />;
-}
+}

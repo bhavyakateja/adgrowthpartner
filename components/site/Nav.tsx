@@ -69,8 +69,9 @@ export function Nav() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-500 ${hidden && !open ? "-translate-y-full" : "translate-y-0"
-          }`}
+        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-500 ${
+          hidden && !open ? "-translate-y-full" : "translate-y-0"
+        }`}
       >
         <div className="border-b border-cream/10 bg-ink/85 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-375 items-center justify-between px-5 md:px-10">
@@ -84,10 +85,11 @@ export function Nav() {
                 <Link
                   key={link.to}
                   href={link.to}
-                  className={`label-mono transition-colors hover:text-sunset ${isActive(link.to)
-                    ? "text-sunset"
-                    : "text-cream/70"
-                    }`}
+                  className={`label-mono transition-colors hover:text-sunset ${
+                    isActive(link.to)
+                      ? "text-sunset"
+                      : "text-cream/70"
+                  }`}
                 >
                   {t(link.key)}
                 </Link>
@@ -162,10 +164,11 @@ export function Nav() {
                 >
                   <Link
                     href={link.to}
-                    className={`font-display flex items-baseline justify-between py-4 text-[13vw] leading-none tracking-tight uppercase transition-colors hover:text-sunset ${isActive(link.to)
-                      ? "text-sunset"
-                      : "text-cream"
-                      }`}
+                    className={`font-display flex items-baseline justify-between py-4 text-[13vw] leading-none tracking-tight uppercase transition-colors hover:text-sunset ${
+                      isActive(link.to)
+                        ? "text-sunset"
+                        : "text-cream"
+                    }`}
                   >
                     {t(link.key)}
 
@@ -177,12 +180,12 @@ export function Nav() {
               ))}
             </nav>
 
-            <div className="relative mt-10 flex items-center justify-between px-6">
+            <div className="relative mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6">
               <LanguageSelect />
 
               <a
                 href={`mailto:${SITE.email}`}
-                className="label-mono text-cream/60"
+                className="label-mono text-cream/60 break-all sm:break-normal text-xs sm:text-sm"
               >
                 {SITE.email}
               </a>

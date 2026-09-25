@@ -1,38 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function AuthPage() {
-    const router = useRouter();
-    const [mode, setMode] = useState<"signin" | "signup">("signin");
+export default function AdminsManagementPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setBusy(true);
         setError(null);
+        setSuccess(null);
 
         try {
-            const response = await fetch("/api/admin/auth", {
+            const response = await fetch("/api/admin/users", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ mode, email, password }),
+                body: JSON.stringify({ email, password }),
             });
             const result = await response.json();
 
             if (!response.ok || !result.success) {
-                setError(result.error || "Authentication failed.");
+                setError(result.error || "Failed to create admin account.");
                 return;
             }
 
-            router.replace("/admin");
-            router.refresh();
+            setSuccess(`Admin account successfully created for ${email}`);
+            setEmail("");
+            setPassword("");
         } catch {
             setError("Something went wrong. Please try again.");
         } finally {
@@ -41,20 +41,19 @@ export default function AuthPage() {
     }
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-background px-5 py-24">
-            <div className="w-full max-w-sm">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    {mode === "signin" ? "Sign in" : "Create the first account"}
-                </h1>
+        <div className="max-w-2xl py-6">
+            <h1 className="text-2xl font-semibold tracking-tight">Admin Accounts</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+                Provision new internal admin accounts with secure dashboard access.
+            </p>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                    Internal access for the Ad Growth Partner team.
-                </p>
-
-                <form onSubmit={onSubmit} className="mt-8 space-y-5">
+            <div className="mt-8 rounded-lg border border-border bg-background p-6 shadow-sm">
+                <h2 className="text-lg font-medium">Create New Administrator</h2>
+                
+                <form onSubmit={onSubmit} className="mt-5 space-y-4">
                     <div>
                         <label htmlFor="email" className="text-sm font-medium">
-                            Email
+                            Email Address
                         </label>
                         <input
                             id="email"
@@ -62,8 +61,9 @@ export default function AuthPage() {
                             required
                             autoComplete="email"
                             value={email}
-                            onChange={(event) => setEmail(event.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            placeholder="colleague@adgrowthpartner.com"
                         />
                     </div>
 
@@ -77,12 +77,11 @@ export default function AuthPage() {
                                 type={showPassword ? "text" : "password"}
                                 required
                                 minLength={8}
-                                autoComplete={
-                                    mode === "signin" ? "current-password" : "new-password"
-                                }
+                                autoComplete="new-password"
                                 value={password}
-                                onChange={(event) => setPassword(event.target.value)}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                placeholder="At least 8 characters"
                             />
                             <button
                                 type="button"
@@ -105,32 +104,21 @@ export default function AuthPage() {
                         </p>
                     )}
 
+                    {success && (
+                        <p role="status" className="text-sm text-emerald-600 dark:text-emerald-400">
+                            {success}
+                        </p>
+                    )}
+
                     <button
                         type="submit"
                         disabled={busy}
-                        className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                        className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
                     >
-                        {busy
-                            ? "Working..."
-                            : mode === "signin"
-                                ? "Sign in"
-                                : "Create account"}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setMode(mode === "signin" ? "signup" : "signin");
-                            setError(null);
-                        }}
-                        className="w-full text-center text-xs text-muted-foreground hover:underline"
-                    >
-                        {mode === "signin"
-                            ? "First time? Create the admin account"
-                            : "Back to sign in"}
+                        {busy ? "Creating..." : "Create Account"}
                     </button>
                 </form>
             </div>
-        </main>
+        </div>
     );
 }

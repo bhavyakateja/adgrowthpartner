@@ -11,6 +11,7 @@ const navigation = [
     { name: "Work", href: "/admin/work" },
     { name: "Careers", href: "/admin/careers" },
     { name: "Applications", href: "/admin/applications" },
+    { name: "Admins", href: "/admin/admins" },
 ];
 
 export function AdminShell({
@@ -73,10 +74,11 @@ export function AdminShell({
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`whitespace-nowrap border-b-2 py-4 text-sm ${active
+                                className={`whitespace-nowrap border-b-2 py-4 text-sm ${
+                                    active
                                         ? "border-foreground text-foreground"
                                         : "border-transparent text-muted-foreground hover:text-foreground"
-                                    }`}
+                                }`}
                             >
                                 {item.name}
                             </Link>
@@ -85,7 +87,9 @@ export function AdminShell({
                 </div>
             </nav>
 
-            {children}
+            <main className="mx-auto max-w-7xl px-6 py-8">
+                {children}
+            </main>
         </div>
     );
 }
