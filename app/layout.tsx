@@ -5,7 +5,9 @@ import "./globals.css";
 
 import { SiteChrome } from "@/components/site/SiteChrome";
 import { I18nProvider } from "@/lib/i18n";
-import IntroAnimation from '@/components/intro/IntroAnimation';
+import IntroBootstrap from "@/components/intro/IntroBootstrap";
+import IntroAnimation from "@/components/intro/IntroAnimation";
+import { GoogleTranslateSync } from "@/components/site/GoogleTranslateSync";
 
 import {
   Anton,
@@ -18,12 +20,14 @@ const anton = Anton({
   weight: "400",
   variable: "--font-anton",
   display: "swap",
+  preload: false, // Prevents unused font preload warnings in dev
 });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   display: "swap",
+  preload: false, // Prevents unused font preload warnings in dev
 });
 
 const spaceMono = Space_Mono({
@@ -31,6 +35,7 @@ const spaceMono = Space_Mono({
   weight: ["400", "700"],
   variable: "--font-space-mono",
   display: "swap",
+  preload: false, // Prevents unused font preload warnings in dev
 });
 
 export const metadata: Metadata = {
@@ -58,22 +63,53 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    // suppressHydrationWarning: IntroBootstrap sets <html data-intro="…"> before
+    // React hydrates, which would otherwise log an attribute-mismatch warning.
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${anton.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
       >
-        {/* Hidden Google Translate Element required for background widget script */}
-        <div id="google_translate_element" style={{ display: "none" }} />
+        {/* Must stay first: decides play/skip before anything below paints. */}
+        <IntroBootstrap />
+        <IntroAnimation />
 
-        {/* Google Translate Scripts */}
-        <Script
-          id="google-translate"
-          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="afterInteractive"
+        {/*
+          Google Translate container.
+
+          IMPORTANT: this must NOT be `display: none`. Google's script needs
+          the element to actually be laid out to build its internal
+          <select class="goog-te-combo">, which is what our language
+          switcher drives. `display:none` here was the reason translation
+          never worked at all — the combo box was simply never created.
+          This is the standard visually-hidden (not display:none) pattern:
+          present in layout, invisible on screen.
+        */}
+        <div
+          id="google_translate_element"
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            padding: 0,
+            margin: -1,
+            overflow: "hidden",
+            clip: "rect(0,0,0,0)",
+            whiteSpace: "nowrap",
+            border: 0,
+          }}
         />
+
+        {/*
+          Order matters: the callback Google's script looks up on `window`
+          must exist BEFORE that script loads and tries to call it. Define
+          it first, then load the script that invokes it.
+        */}
         <Script id="google-translate-init" strategy="afterInteractive">
           {`
             function googleTranslateElementInit() {
+              // Guard against double-init (Fast Refresh in dev, etc.)
+              if (window.__gtInit) return;
+              window.__gtInit = true;
               new google.translate.TranslateElement({
                 pageLanguage: 'en',
                 autoDisplay: false
@@ -82,6 +118,15 @@ export default function RootLayout({
             window.googleTranslateElementInit = googleTranslateElementInit;
           `}
         </Script>
+        <Script
+          id="google-translate"
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
+
+        {/* Reapplies a previously chosen language after route changes and
+            on first mount if the widget was still loading. */}
+        <GoogleTranslateSync />
 
         {/* Global Styles to suppress Google's intrusive banner and layout jumps */}
         <style>{`
@@ -92,7 +137,6 @@ export default function RootLayout({
           .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
         `}</style>
 
-        <IntroAnimation />
         <I18nProvider>
           <SiteChrome>{children}</SiteChrome>
         </I18nProvider>

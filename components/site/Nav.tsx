@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 import { NAV_LINKS, SITE } from "@/lib/site";
 import { useI18n } from "@/lib/i18n";
 import { LanguageSelect } from "./LanguageSelect";
@@ -14,7 +13,7 @@ function Wordmark() {
   return (
     <Link
       href="/"
-      className="flex items-center"
+      className="flex shrink-0 items-center"
       aria-label={`${SITE.name} — home`}
     >
       <Image
@@ -32,7 +31,6 @@ function Wordmark() {
 export function Nav() {
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
-
   const reduced = useReducedMotion();
   const pathname = usePathname();
   const { t } = useI18n();
@@ -46,6 +44,7 @@ export function Nav() {
 
     const onScroll = () => {
       const y = window.scrollY;
+
       setHidden(y > 160 && y > last);
       last = y;
     };
@@ -73,48 +72,69 @@ export function Nav() {
           hidden && !open ? "-translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="border-b border-cream/10 bg-ink/85 backdrop-blur-md">
-          <div className="mx-auto flex h-16 max-w-375 items-center justify-between px-5 md:px-10">
+        {/* Main navbar */}
+        <div className="border-b border-[#FF6F4C]/15 bg-[#0D0D0B]/95 shadow-[0_8px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-5 md:h-[72px] md:px-10">
             <Wordmark />
 
+            {/* Desktop navigation */}
             <nav
               aria-label="Primary"
-              className="hidden items-center gap-7 lg:flex"
+              className="hidden items-center gap-6 lg:flex xl:gap-8"
             >
               {NAV_LINKS.slice(1, 6).map((link) => (
                 <Link
                   key={link.to}
                   href={link.to}
-                  className={`label-mono transition-colors hover:text-sunset ${
+                  className={`group label-mono relative py-2 transition-colors ${
                     isActive(link.to)
-                      ? "text-sunset"
-                      : "text-cream/70"
+                      ? "text-[#FF6F4C]"
+                      : "text-[#F6F1E3]/65 hover:text-[#FF6F4C]"
                   }`}
                 >
                   {t(link.key)}
+
+                  {/* Coral active/hover line */}
+                  <span
+                    className={`absolute inset-x-0 -bottom-0.5 h-px origin-left bg-[#FF6F4C] transition-transform duration-300 ${
+                      isActive(link.to)
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100"
+                    }`}
+                  />
                 </Link>
               ))}
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Language */}
               <div className="hidden sm:block">
                 <LanguageSelect />
               </div>
 
+              {/* Contact */}
               <Link
                 href="/contact"
-                className="label-mono group relative hidden overflow-hidden rounded-full bg-cream px-5 py-2.5 text-ink sm:inline-block"
+                className="label-mono group relative hidden overflow-hidden rounded-full border border-[#F6F1E3]/15 bg-[#F6F1E3] px-5 py-2.5 text-[#2B2A22] transition-colors sm:inline-block"
               >
-                <span className="relative z-10">{t("nav.contact")}</span>
-                <span className="absolute inset-0 translate-y-full bg-gold transition-transform duration-300 group-hover:translate-y-0" />
+                <span className="relative z-10 transition-colors duration-300 group-hover:text-[#F6F1E3]">
+                  {t("nav.contact")}
+                </span>
+
+                <span className="absolute inset-0 translate-y-full bg-[#FF6F4C] transition-transform duration-300 group-hover:translate-y-0" />
               </Link>
 
+              {/* Mobile menu button */}
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
-                className="label-mono flex h-11 items-center gap-2 rounded-full border border-cream/25 px-4 text-cream lg:hidden"
+                className={`label-mono flex h-10 items-center gap-2 rounded-full border px-4 transition-all duration-300 lg:hidden ${
+                  open
+                    ? "border-[#FF6F4C] bg-[#FF6F4C] text-[#0D0D0B]"
+                    : "border-[#F6F1E3]/20 text-[#F6F1E3]/80 hover:border-[#FF6F4C] hover:text-[#FF6F4C]"
+                }`}
               >
                 {open ? t("nav.close") : t("nav.menu")}
               </button>
@@ -123,12 +143,13 @@ export function Nav() {
         </div>
       </header>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {open && (
           <motion.div
             id="mobile-menu"
             key="menu"
-            className="on-ink fixed inset-0 z-40 flex flex-col overflow-y-auto bg-ink pt-24 pb-10"
+            className="on-ink fixed inset-0 z-40 flex flex-col overflow-y-auto bg-[#0D0D0B] pt-24 pb-8 text-[#F6F1E3]"
             initial={reduced ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={
@@ -141,14 +162,20 @@ export function Nav() {
               ease: [0.32, 0.72, 0, 1],
             }}
           >
+            {/* Subtle coral atmosphere */}
             <div
-              className="surface-horizon pointer-events-none absolute inset-0 opacity-70"
+              className="pointer-events-none absolute -right-32 top-24 h-80 w-80 rounded-full bg-[#FF6F4C]/8 blur-3xl"
+              aria-hidden
+            />
+
+            <div
+              className="pointer-events-none absolute -left-40 bottom-20 h-72 w-72 rounded-full bg-[#2B2A22]/60 blur-3xl"
               aria-hidden
             />
 
             <nav
               aria-label="Mobile"
-              className="relative flex flex-1 flex-col justify-center px-6"
+              className="relative flex flex-1 flex-col justify-center px-5 sm:px-8"
             >
               {NAV_LINKS.map((link, i) => (
                 <motion.div
@@ -160,19 +187,25 @@ export function Nav() {
                     duration: 0.5,
                     ease: [0.32, 0.72, 0, 1],
                   }}
-                  className="border-b border-cream/10"
+                  className="border-b border-[#F6F1E3]/10"
                 >
                   <Link
                     href={link.to}
-                    className={`font-display flex items-baseline justify-between py-4 text-[13vw] leading-none tracking-tight uppercase transition-colors hover:text-sunset ${
+                    className={`group flex items-baseline justify-between py-4 font-display text-[12vw] leading-none tracking-tight uppercase transition-colors sm:text-[10vw] md:text-[8vw] ${
                       isActive(link.to)
-                        ? "text-sunset"
-                        : "text-cream"
+                        ? "text-[#FF6F4C]"
+                        : "text-[#F6F1E3] hover:text-[#FF6F4C]"
                     }`}
                   >
-                    {t(link.key)}
+                    <span>{t(link.key)}</span>
 
-                    <span className="label-mono text-cream/35">
+                    <span
+                      className={`label-mono text-xs transition-colors sm:text-sm ${
+                        isActive(link.to)
+                          ? "text-[#FF6F4C]"
+                          : "text-[#F6F1E3]/25 group-hover:text-[#FF6F4C]"
+                      }`}
+                    >
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </Link>
@@ -180,12 +213,13 @@ export function Nav() {
               ))}
             </nav>
 
-            <div className="relative mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6">
+            {/* Mobile bottom area */}
+            <div className="relative mt-10 flex flex-col gap-5 border-t border-[#F6F1E3]/10 px-5 pt-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <LanguageSelect />
 
               <a
                 href={`mailto:${SITE.email}`}
-                className="label-mono text-cream/60 break-all sm:break-normal text-xs sm:text-sm"
+                className="label-mono break-all text-xs text-[#F6F1E3]/45 transition-colors hover:text-[#FF6F4C] sm:break-normal sm:text-sm"
               >
                 {SITE.email}
               </a>

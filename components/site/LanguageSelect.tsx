@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Globe } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LOCALES, useI18n, type LocaleCode } from "@/lib/i18n";
+import { switchLanguage } from "@/lib/google-translate";
 
 export function LanguageSelect({
   variant = "bar",
@@ -15,33 +17,33 @@ export function LanguageSelect({
   variant?: "bar" | "block";
 }) {
   const { locale, setLocale, t } = useI18n();
+  const [pending, setPending] = useState<LocaleCode | null>(null);
 
-  const current =
-    LOCALES.find((item) => item.code === locale) ?? LOCALES[0];
+  const current = LOCALES.find((item) => item.code === locale) ?? LOCALES[0];
 
-  const handleLanguageChange = (code: LocaleCode) => {
-    // 1. Save state locally
-    setLocale(code);
+  const handleLanguageChange = async (code: LocaleCode) => {
+    if (code === locale || pending) return;
 
-    // 2. Set Google Translate cookie for the root domain
-    const googleLangCookie = code === "en" ? "/en/en" : `/en/${code}`;
-    
-    // Set cookie with explicit domain/path flags so Google reads it immediately on reload
-    document.cookie = `googtrans=${googleLangCookie}; path=/; max-age=31536000;`;
-    document.cookie = `googtrans=${googleLangCookie}; path=/; domain=${window.location.hostname}; max-age=31536000;`;
+    setPending(code);
+    setLocale(code); // updates this component's own UI immediately
 
-    // 3. Force reload so Google's initialization script parses the cookie and translates the page
-    window.location.reload();
+    try {
+      await switchLanguage(code); // drives Google Translate — no reload in the common case
+    } finally {
+      setPending(null);
+    }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t("nav.language")}
+        aria-busy={pending !== null}
         className={
-          variant === "bar"
+          (variant === "bar"
             ? "label-mono inline-flex items-center gap-2 rounded-full border border-cream/25 px-3 py-2 text-cream/75 transition-colors hover:border-cream/60 hover:text-cream"
-            : "label-mono inline-flex items-center gap-2 border-b border-border pb-1 transition-colors hover:text-sunset"
+            : "label-mono inline-flex items-center gap-2 border-b border-border pb-1 transition-colors hover:text-sunset") +
+          (pending ? " opacity-60" : "")
         }
       >
         <Globe aria-hidden className="size-3.5" />
@@ -55,7 +57,7 @@ export function LanguageSelect({
         {LOCALES.map((item) => (
           <DropdownMenuItem
             key={item.code}
-            onSelect={() => handleLanguageChange(item.code)}
+            onSelect={() => void handleLanguageChange(item.code)}
             className="flex items-center justify-between gap-6 text-sm cursor-pointer"
             aria-current={item.code === locale ? "true" : undefined}
           >
