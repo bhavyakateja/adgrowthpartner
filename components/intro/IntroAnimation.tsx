@@ -38,6 +38,7 @@ export default function IntroAnimation() {
     } catch {
       /* storage unavailable — fine, worst case it replays next load */
     }
+
     setPhase("leaving");
   }, []);
 
@@ -51,16 +52,19 @@ export default function IntroAnimation() {
   //    We only mount the <video> if we're actually going to play.
   useEffect(() => {
     const state = document.documentElement.getAttribute(INTRO_ATTR);
+
     if (state === "skip" || state === "done") {
       setPhase("done");
       return;
     }
+
     setVideoMounted(true);
   }, []);
 
   // 2) Playback lifecycle.
   useEffect(() => {
     if (!videoMounted) return;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -81,6 +85,7 @@ export default function IntroAnimation() {
     // moment: hold the static logo briefly, then fade out the same way.
     const showFallback = () => {
       if (disposed || started || leavingRef.current) return;
+
       setFallback(true);
       later(leave, INTRO_FALLBACK_HOLD_MS);
     };
@@ -90,21 +95,31 @@ export default function IntroAnimation() {
     // dissolve into the site instead of into a blank cream screen.
     const watchLead = () => {
       if (disposed || leavingRef.current) return;
+
       const d = video.duration;
-      if (Number.isFinite(d) && video.currentTime >= d - INTRO_LEAD_MS / 1000) {
+
+      if (
+        Number.isFinite(d) &&
+        video.currentTime >= d - INTRO_LEAD_MS / 1000
+      ) {
         leave();
         return;
       }
+
       raf = requestAnimationFrame(watchLead);
     };
 
     const onPlaying = () => {
       if (started) return;
+
       started = true;
       window.clearTimeout(startTimer);
 
-      const seconds = Number.isFinite(video.duration) ? video.duration : 8;
-      later(leave, seconds * 1000 + INTRO_END_GRACE_MS); // watchdog
+      const seconds = Number.isFinite(video.duration)
+        ? video.duration
+        : 8;
+
+      later(leave, seconds * 1000 + INTRO_END_GRACE_MS);
       raf = requestAnimationFrame(watchLead);
     };
 
@@ -112,10 +127,13 @@ export default function IntroAnimation() {
 
     const start = () => {
       if (disposed) return;
+
       // Set as a property: React doesn't always reflect `muted` to the DOM
       // attribute, and un-muted autoplay is blocked everywhere.
       video.muted = true;
+
       startTimer = later(showFallback, INTRO_START_TIMEOUT_MS);
+
       video.play().catch(() => (started ? leave() : showFallback()));
     };
 
@@ -126,23 +144,32 @@ export default function IntroAnimation() {
     // A tab opened in the background must not burn through the intro unseen.
     // Wait until it is actually visible before starting playback.
     let onVisible: (() => void) | null = null;
+
     if (document.visibilityState === "visible") {
       start();
     } else {
       onVisible = () => {
         if (document.visibilityState !== "visible" || !onVisible) return;
+
         document.removeEventListener("visibilitychange", onVisible);
         onVisible = null;
         start();
       };
+
       document.addEventListener("visibilitychange", onVisible);
     }
 
     return () => {
       disposed = true;
+
       cancelAnimationFrame(raf);
+
       timers.forEach((id) => window.clearTimeout(id));
-      if (onVisible) document.removeEventListener("visibilitychange", onVisible);
+
+      if (onVisible) {
+        document.removeEventListener("visibilitychange", onVisible);
+      }
+
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("ended", leave);
       video.removeEventListener("error", onError);
@@ -152,12 +179,21 @@ export default function IntroAnimation() {
   // 3) Safety net in case `transitionend` never fires (e.g. tab throttled).
   useEffect(() => {
     if (phase !== "leaving") return;
+
     const id = window.setTimeout(finish, INTRO_LEAVE_MS + 250);
+
     return () => window.clearTimeout(id);
   }, [phase, finish]);
 
-  const onTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && e.propertyName === "opacity") finish();
+  const onTransitionEnd = (
+    e: TransitionEvent<HTMLDivElement>,
+  ) => {
+    if (
+      e.target === e.currentTarget &&
+      e.propertyName === "opacity"
+    ) {
+      finish();
+    }
   };
 
   if (phase === "done") return null;
@@ -184,10 +220,23 @@ export default function IntroAnimation() {
           disableRemotePlayback
           tabIndex={-1}
         >
-          {/* MP4 first: H.264 is hardware-decoded everywhere. VP9/WebM can be
-              software-decoded (or unsupported) on older / low-end devices. */}
-          <source src="/intro/logo-intro.mp4" type="video/mp4" />
-          <source src="/intro/logo-intro.webm" type="video/webm" />
+          {/* Laptop / desktop intro */}
+          <source
+            src="/intro/logo-intro-2.mp4"
+            type="video/mp4"
+            media="(min-width: 1024px)"
+          />
+
+          {/* Phone / tablet intro */}
+          <source
+            src="/intro/logo-intro.mp4"
+            type="video/mp4"
+          />
+
+          <source
+            src="/intro/logo-intro.webm"
+            type="video/webm"
+          />
         </video>
       )}
 
